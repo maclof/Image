@@ -85,6 +85,7 @@ class Image
         'jpeg'  => 'jpeg',
         'png'   => 'png',
         'gif'   => 'gif',
+        'copy'  => 'copy',
     );
     
     /**
@@ -429,6 +430,10 @@ class Image
 
         $cacheFile .= '.'.$type;
 
+        if ($type == 'copy') {
+            $cacheFile .= '.' . $this->guessType();
+        }
+
         // If the files does not exists, save it
         $image = $this;
 
@@ -513,6 +518,14 @@ class Image
     }
 
     /**
+     * Copies the source image to the cached destination without any operations applied.
+     */
+    public function copy()
+    {
+        return $this->cacheFile('copy');
+    }
+
+    /**
      * Get all the files that this image depends on
      *
      * @return string[] this is an array of strings containing all the files that the
@@ -586,6 +599,14 @@ class Image
         $type = self::$types[$type];
 
         try {
+            if ($type == 'copy') {
+                if (copy($this->getFilePath(), $file)) {
+                    return $file;
+                }
+
+                return false;
+            }
+
             $this->init();
             $this->applyOperations();
 
